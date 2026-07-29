@@ -1,0 +1,60 @@
+import CopyButton from "./CopyButton";
+import DeleteButton from "./DeleteButton";
+import Link from "next/link";
+
+type Props = {
+  url: {
+    id: string;
+    originalUrl: string;
+    shortCode: string;
+    clickCount: number;
+    createdAt: Date;
+  };
+};
+
+export default function UrlCard({ url }: Props) {
+  return (
+    <div className="rounded-lg border p-5 shadow-sm">
+
+      <p>
+        <span className="font-semibold">
+          Original URL:
+        </span>{" "}
+        {url.originalUrl}
+      </p>
+
+      <div className="flex items-center gap-3">
+        <span className="font-semibold">
+          Short URL:
+        </span>
+
+        <Link
+          href={`/${url.shortCode}`}
+          target="_blank"
+          className="text-blue-600 underline hover:text-blue-800"
+        >
+          http://localhost:3000/{url.shortCode}
+        </Link>
+
+        <CopyButton
+          text={`http://localhost:3000/${url.shortCode}`}
+        />
+      </div>
+
+      <p>
+        <span className="font-semibold">
+          Clicks:
+        </span>{" "}
+        {url.clickCount}
+      </p>
+
+      <p className="text-sm text-gray-500">
+        Created: {url.createdAt.toLocaleDateString()}
+      </p>
+      <div className="mt-4 flex justify-end">
+        <DeleteButton id={url.id} />
+      </div>
+
+    </div>
+  );
+}
