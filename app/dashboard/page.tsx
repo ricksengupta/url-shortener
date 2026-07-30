@@ -10,34 +10,38 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
-  // Total number of links created by this user
-  const totalLinks = await prisma.url.count({
-    where: {
-      clerkUserId: userId,
-    },
-  });
+  // Run all independent database queries in parallel
+  const [totalLinks, clickStats, urls] = await Promise.all([
+    prisma.url.count({
+      where: {
+        clerkUserId: userId,
+      },
+    }),
 
-  // Sum of all clicks across this user's links
-  const clickStats = await prisma.url.aggregate({
-    where: {
-      clerkUserId: userId,
-    },
-    _sum: {
-      clickCount: true,
-    },
-  });
+    prisma.url.aggregate({
+      where: {
+        clerkUserId: userId,
+      },
+      _sum: {
+        clickCount: true,
+      },
+      _avg: {
+        clickCount: true,
+      },
+    }),
+
+    prisma.url.findMany({
+      where: {
+        clerkUserId: userId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+  ]);
 
   const totalClicks = clickStats._sum.clickCount ?? 0;
-
-  // Fetch all URLs for this user
-  const urls = await prisma.url.findMany({
-    where: {
-      clerkUserId: userId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const averageClicks = clickStats._avg.clickCount ?? 0;
 
   return (
     <main className="min-h-screen p-8">
@@ -46,7 +50,8 @@ export default async function DashboardPage() {
       </h1>
 
       {/* Statistics Cards */}
-      <div className="mb-8 grid gap-4 md:grid-cols-2">
+      <div className="mb-8 grid gap-4 md:grid-cols-3">
+        {/* Total Links */}
         <div className="rounded-lg border bg-white p-6 shadow-sm">
           <h2 className="text-sm font-medium text-gray-500">
             Total Links
@@ -57,6 +62,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
+        {/* Total Clicks */}
         <div className="rounded-lg border bg-white p-6 shadow-sm">
           <h2 className="text-sm font-medium text-gray-500">
             Total Clicks
@@ -64,6 +70,17 @@ export default async function DashboardPage() {
 
           <p className="mt-2 text-3xl font-bold">
             {totalClicks}
+          </p>
+        </div>
+
+        {/* Average Clicks */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <h2 className="text-sm font-medium text-gray-500">
+            Average Clicks
+          </h2>
+
+          <p className="mt-2 text-3xl font-bold">
+            {averageClicks.toFixed(1)}
           </p>
         </div>
       </div>
