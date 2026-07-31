@@ -2,16 +2,40 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import UrlCard from "@/components/UrlCard";
+import SearchBar from "@/components/SearchBar";
+import SortDropdown from "@/components/SortDropdown";
 
-export default async function DashboardPage() {
+type Props = {
+  searchParams: Promise<{
+    search?: string;
+    sort?: string;
+  }>;
+};
+
+export default async function DashboardPage({
+  searchParams,
+}: Props) {
   const { userId } = await auth();
+
+  const {
+    search = "",
+    sort = "newest",
+  } = await searchParams;
+
 
   if (!userId) {
     redirect("/sign-in");
   }
 
+  const orderBy =
+    sort === "oldest"
+      ? { createdAt: "asc" as const }
+      : sort === "clicks"
+        ? { clickCount: "desc" as const }
+        : { createdAt: "desc" as const };
+
   // Run all independent database queries in parallel
-  const [totalLinks, clickStats, urls] = await Promise.all([
+  const [totalLinks, clickStats, urls, latestUrl] = await Promise.all([
     prisma.url.count({
       where: {
         clerkUserId: userId,
@@ -33,6 +57,17 @@ export default async function DashboardPage() {
     prisma.url.findMany({
       where: {
         clerkUserId: userId,
+
+        originalUrl: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      orderBy,
+    }),
+    prisma.url.findFirst({
+      where: {
+        clerkUserId: userId,
       },
       orderBy: {
         createdAt: "desc",
@@ -45,9 +80,16 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen p-8">
-      <h1 className="mb-6 text-3xl font-bold">
-        Dashboard
-      </h1>
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-3xl font-bold">
+          Dashboard
+        </h1>
+
+        <div className="flex gap-4">
+          <SearchBar />
+          <SortDropdown />
+        </div>
+      </div>
 
       {/* Statistics Cards */}
       <div className="mb-8 grid gap-4 md:grid-cols-3">
@@ -81,6 +123,23 @@ export default async function DashboardPage() {
 
           <p className="mt-2 text-3xl font-bold">
             {averageClicks.toFixed(1)}
+          </p>
+        </div>
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <h2 className="text-sm font-medium text-gray-500">
+            Latest Link
+          </h2>
+
+          <p className="mt-2 truncate text-lg font-semibold">
+            {latestUrl
+              ? latestUrl.originalUrl
+              : "No links yet"}
+          </p>
+
+          <p className="mt-1 text-sm text-gray-500">
+            {latestUrl
+              ? latestUrl.createdAt.toLocaleDateString()
+              : ""}
           </p>
         </div>
       </div>
