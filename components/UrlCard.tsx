@@ -1,6 +1,7 @@
 import CopyButton from "./CopyButton";
 import DeleteButton from "./DeleteButton";
 import Link from "next/link";
+import QRButton from "./QRButton";
 
 type Props = {
   url: {
@@ -51,7 +52,11 @@ export default function UrlCard({ url }: Props) {
       <p className="text-sm text-gray-500">
         Created: {url.createdAt.toLocaleDateString()}
       </p>
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex justify-end gap-2">
+        <QRButton
+          url={`http://localhost:3000/${url.shortCode}`}
+        />
+
         <DeleteButton id={url.id} />
       </div>
 

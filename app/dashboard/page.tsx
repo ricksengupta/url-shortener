@@ -4,11 +4,13 @@ import { prisma } from "@/lib/prisma";
 import UrlCard from "@/components/UrlCard";
 import SearchBar from "@/components/SearchBar";
 import SortDropdown from "@/components/SortDropdown";
+import Pagination from "@/components/Pagination";
 
 type Props = {
   searchParams: Promise<{
     search?: string;
     sort?: string;
+    page?: string;
   }>;
 };
 
@@ -20,8 +22,12 @@ export default async function DashboardPage({
   const {
     search = "",
     sort = "newest",
+    page = "1",
   } = await searchParams;
 
+  const currentPage = Number(page);
+  const PAGE_SIZE = 5;
+  const skip = (currentPage - 1) * PAGE_SIZE;
 
   if (!userId) {
     redirect("/sign-in");
@@ -39,6 +45,11 @@ export default async function DashboardPage({
     prisma.url.count({
       where: {
         clerkUserId: userId,
+
+        originalUrl: {
+          contains: search,
+          mode: "insensitive",
+        },
       },
     }),
 
@@ -64,6 +75,10 @@ export default async function DashboardPage({
         },
       },
       orderBy,
+
+      skip,
+
+      take: PAGE_SIZE,
     }),
     prisma.url.findFirst({
       where: {
@@ -77,6 +92,7 @@ export default async function DashboardPage({
 
   const totalClicks = clickStats._sum.clickCount ?? 0;
   const averageClicks = clickStats._avg.clickCount ?? 0;
+  const totalPages = Math.ceil(totalLinks / PAGE_SIZE);
 
   return (
     <main className="min-h-screen p-8">
@@ -149,16 +165,24 @@ export default async function DashboardPage({
         <p className="text-gray-500">
           You have not created any shortened URLs yet.
         </p>
-      ) : (
-        <div className="space-y-4">
-          {urls.map((url) => (
-            <UrlCard
-              key={url.id}
-              url={url}
+      ) :
+
+        (
+          <>
+            <div className="space-y-4">
+              {urls.map((url) => (
+                <UrlCard
+                  key={url.id}
+                  url={url}
+                />
+              ))}
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
             />
-          ))}
-        </div>
-      )}
+          </>
+        )}
     </main>
   );
 }
