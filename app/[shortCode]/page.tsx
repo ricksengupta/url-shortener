@@ -12,23 +12,31 @@ export default async function RedirectPage({ params }: Props) {
 
     const url = await prisma.url.findUnique({
         where: {
-           shortCode: shortCode,
+            shortCode: shortCode,
         },
     });
 
     if (!url) {
         notFound();
     }
-    await prisma.url.update({
-        where: {
-            id: url.id,
-        },
-        data: {
-            clickCount: {
-                increment: 1,
+    await prisma.$transaction([
+        prisma.click.create({
+            data: {
+                urlId: url.id,
             },
-        },
-    });
+        }),
+
+        prisma.url.update({
+            where: {
+                id: url.id,
+            },
+            data: {
+                clickCount: {
+                    increment: 1,
+                },
+            },
+        }),
+    ]);
 
     redirect(url.originalUrl);
 }
