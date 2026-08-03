@@ -25,6 +25,10 @@ model Click {
   id        String   @id @default(cuid())
   urlId     String
   clickedAt DateTime @default(now())
+  
+   browser String?
+  os       String?
+  device   String?
 
   url Url @relation(fields: [urlId], references: [id], onDelete: Cascade)
 }
