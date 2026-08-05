@@ -57,6 +57,13 @@ export default function UrlCard({ url }: Props) {
           url={`http://localhost:3000/${url.shortCode}`}
         />
 
+        <Link
+          href={`/dashboard/analytics/${url.id}`}
+          className="rounded bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
+        >
+          Analytics
+        </Link>
+
         <DeleteButton id={url.id} />
       </div>
 

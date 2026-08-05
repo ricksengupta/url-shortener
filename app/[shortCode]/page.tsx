@@ -35,6 +35,12 @@ export default async function RedirectPage({ params }: Props) {
     const device =
         parser.getDevice().type ?? "Desktop";
 
+    const country =
+        headersList.get("x-vercel-ip-country") ?? "Unknown";
+
+    const city =
+        headersList.get("x-vercel-ip-city") ?? "Unknown";
+
     if (!url) {
         notFound();
     }
@@ -45,6 +51,8 @@ export default async function RedirectPage({ params }: Props) {
                 browser,
                 os,
                 device,
+                country,
+                city,
             },
         }),
 

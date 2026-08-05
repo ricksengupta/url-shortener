@@ -30,5 +30,8 @@ model Click {
   os       String?
   device   String?
 
+    country String?
+    city     String?
+
   url Url @relation(fields: [urlId], references: [id], onDelete: Cascade)
 }
