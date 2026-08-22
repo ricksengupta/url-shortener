@@ -14,59 +14,77 @@ type Props = {
 };
 
 export default function UrlCard({ url }: Props) {
+  const shortUrl = `http://localhost:3000/${url.shortCode}`;
+
   return (
-    <div className="rounded-lg border p-5 shadow-sm">
+    <div className="group rounded-xl border border-slate-200 bg-white/90 p-6 shadow-md backdrop-blur-sm transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg">
 
-      <p>
-        <span className="font-semibold">
-          Original URL:
-        </span>{" "}
-        {url.originalUrl}
-      </p>
+      {/* Original URL */}
+      <div>
+        <p className="text-sm font-semibold text-gray-500">
+          Original URL
+        </p>
 
-      <div className="flex items-center gap-3">
-        <span className="font-semibold">
-          Short URL:
-        </span>
-
-        <Link
-          href={`/${url.shortCode}`}
-          target="_blank"
-          className="text-blue-600 underline hover:text-blue-800"
-        >
-          http://localhost:3000/{url.shortCode}
-        </Link>
-
-        <CopyButton
-          text={`http://localhost:3000/${url.shortCode}`}
-        />
+        <p className="break-all font-medium text-blue-600 hover:text-blue-800">
+          {url.originalUrl}
+        </p>
       </div>
 
-      <p>
-        <span className="font-semibold">
-          Clicks:
-        </span>{" "}
-        {url.clickCount}
-      </p>
+      {/* Short URL */}
+      <div className="mt-5">
+        <p className="text-sm font-semibold text-purple-600">
+          Short URL
+        </p>
 
-      <p className="text-sm text-gray-500">
-        Created: {url.createdAt.toLocaleDateString()}
-      </p>
-      <div className="mt-4 flex justify-end gap-2">
-        <QRButton
-          url={`http://localhost:3000/${url.shortCode}`}
-        />
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <Link
+            href={`/${url.shortCode}`}
+            target="_blank"
+            className="break-all font-medium text-blue-600 hover:text-blue-800"
+          >
+            {shortUrl}
+          </Link>
+
+          <CopyButton text={shortUrl} />
+        </div>
+      </div>
+
+      {/* Metadata */}
+      <div className="mt-5 flex flex-wrap gap-6 text-sm">
+        <div>
+          <p className="text-gray-500">
+            Clicks
+          </p>
+
+          <p className="font-semibold">
+            {url.clickCount}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-gray-500">
+            Created
+          </p>
+
+          <p className="font-semibold">
+            {url.createdAt.toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+        <QRButton url={shortUrl} />
 
         <Link
           href={`/dashboard/analytics/${url.id}`}
-          className="rounded bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
+          className="rounded-lg bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 transition hover:bg-purple-200"
         >
           Analytics
         </Link>
 
         <DeleteButton id={url.id} />
       </div>
-
     </div>
   );
 }
