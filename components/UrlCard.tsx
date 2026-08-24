@@ -14,29 +14,29 @@ type Props = {
 };
 
 export default function UrlCard({ url }: Props) {
-  const shortUrl = `http://localhost:3000/${url.shortCode}`;
+  const shortUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/${url.shortCode}`;
 
   return (
-    <div className="group rounded-xl border border-slate-200 bg-white/90 p-6 shadow-md backdrop-blur-sm transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg">
+    <div className="group rounded-xl border border-slate-200 bg-white/90 p-4 shadow-md backdrop-blur-sm transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg sm:p-6">
 
       {/* Original URL */}
-      <div>
+      <div className="min-w-0">
         <p className="text-sm font-semibold text-gray-500">
           Original URL
         </p>
 
-        <p className="break-all font-medium text-blue-600 hover:text-blue-800">
+        <p className="mt-1 break-all font-medium text-blue-600">
           {url.originalUrl}
         </p>
       </div>
 
       {/* Short URL */}
-      <div className="mt-5">
+      <div className="mt-5 min-w-0">
         <p className="text-sm font-semibold text-purple-600">
           Short URL
         </p>
 
-        <div className="mt-1 flex flex-wrap items-center gap-3">
+        <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <Link
             href={`/${url.shortCode}`}
             target="_blank"
@@ -50,7 +50,7 @@ export default function UrlCard({ url }: Props) {
       </div>
 
       {/* Metadata */}
-      <div className="mt-5 flex flex-wrap gap-6 text-sm">
+      <div className="mt-5 grid grid-cols-2 gap-4 text-sm sm:flex sm:flex-wrap sm:gap-6">
         <div>
           <p className="text-gray-500">
             Clicks
@@ -73,12 +73,13 @@ export default function UrlCard({ url }: Props) {
       </div>
 
       {/* Actions */}
-      <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+      <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+
         <QRButton url={shortUrl} />
 
         <Link
           href={`/dashboard/analytics/${url.id}`}
-          className="rounded-lg bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 transition hover:bg-purple-200"
+          className="rounded-lg bg-purple-100 px-4 py-2 text-center text-sm font-medium text-purple-700 transition hover:bg-purple-200"
         >
           Analytics
         </Link>
